@@ -2,14 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
-  CheckCircle2,
-  CreditCard,
-  ClipboardList,
-  ShieldAlert,
   Plane,
   ArrowRight,
-  FileCheck2,
-  HandHeart,
+  AlertTriangle,
 } from 'lucide-react';
 
 /* ---------------------------------------------------------------
@@ -19,11 +14,20 @@ import {
    JetBrains Mono. Class names stay namespaced "terms-" to avoid
    collision with the other pages' identical tokens.
 
-   Signature treatment: the two things a prospective client actually
-   needs to check before agreeing — the document checklist and the
-   fee schedule — are drawn as a boarding-pass-style two-part ticket
-   (checklist coupon + fee stub, torn perforation between them), the
-   same object language Contact and About already established.
+   This page now carries two documents in one: a plain-language
+   description of the services Euro Feather sells (drawn as the
+   same boarding-pass-style document/fee ticket used before), and
+   the full "Allgemeine Geschäftsbedingungen" (AGB) underneath it,
+   laid out as ten numbered legal sections — the same object
+   language ("stamped" numbered entries) About already established
+   for its history timeline.
+
+   A few fields in the AGB can only be filled in by Euro Feather
+   itself (registered legal name, full address, tax treatment,
+   the exact contract-formation process, and the legally-reviewed
+   withdrawal notice). Those are marked with a clearly flagged
+   "TodoNote" callout rather than invented, since guessing at legal
+   specifics would be misleading rather than helpful.
 ------------------------------------------------------------------*/
 const INK = '#0A0F1F';
 const PAPER = '#FAF9F5';
@@ -41,7 +45,7 @@ const EASE = 'cubic-bezier(.16,1,.3,1)';
 
 /* ------------------------- scroll reveal ------------------------- */
 
-function useInView(threshold = 0.16) {
+function useInView(threshold = 0.12) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
@@ -143,7 +147,18 @@ function GlobalStyle() {
         opacity: 0.55; pointer-events: none;
       }
 
-      /* --- intro / scope card --- */
+      /* --- quick nav pills --- */
+      .terms-quicknav { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
+      .terms-quicknav a {
+        font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700;
+        letter-spacing: 0.06em; text-transform: uppercase; color: ${ROUTE};
+        background: ${ROUTE_TINT}; border: 1px solid #D6DEF0;
+        padding: 9px 18px; border-radius: 999px; text-decoration: none;
+        transition: background-color .2s ${EASE}, border-color .2s ${EASE}, color .2s ${EASE};
+      }
+      .terms-quicknav a:hover { background: #ffffff; border-color: ${GOLD}; color: ${GOLD}; }
+
+      /* --- intro / disclaimer cards --- */
       .terms-intro-card {
         position: relative; border-radius: 14px; background: #ffffff;
         border: 1px solid ${LINE}; padding: 34px 32px;
@@ -153,90 +168,10 @@ function GlobalStyle() {
       .terms-intro-card p + p { margin-top: 14px; }
       .terms-intro-card strong { color: ${INK}; font-weight: 700; }
 
-      /* =================================================================
-         DOCUMENT + FEE TICKET — checklist coupon torn from a fee stub.
-      ================================================================= */
-      .terms-ticket {
-        position: relative; display: flex; border-radius: 16px; overflow: visible;
-        background: #ffffff; border: 1px solid ${LINE};
-        box-shadow: 0 40px 80px -40px rgba(10,15,31,0.28);
-      }
-      .terms-ticket-main { flex: 1 1 62%; padding: 38px 40px; }
-      .terms-ticket-perf { position: relative; flex: 0 0 0; width: 0; border-left: 2px dashed ${LINE}; }
-      .terms-ticket-perf::before, .terms-ticket-perf::after {
-        content: ''; position: absolute; left: -13px; width: 26px; height: 26px;
-        border-radius: 50%; background: ${PAPER};
-      }
-      .terms-ticket-perf::before { top: -13px; }
-      .terms-ticket-perf::after { bottom: -13px; }
-      .terms-ticket-stub {
-        flex: 1 1 38%; padding: 38px 34px; background: ${PAPER_DIM};
-        border-radius: 0 16px 16px 0;
-      }
-
-      .terms-ticket-kicker {
-        display: flex; align-items: center; gap: 9px;
-        font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600;
-        letter-spacing: 0.14em; text-transform: uppercase; color: ${GOLD};
-        border-bottom: 1px dashed ${LINE}; padding-bottom: 16px; margin-bottom: 20px;
-      }
-
-      .terms-doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
-      .terms-doc-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: ${INK}; line-height: 1.5; }
-      .terms-doc-item svg { flex-shrink: 0; margin-top: 1.5px; color: ${ROUTE}; }
-
-      .terms-fee-line { display: flex; flex-direction: column; gap: 4px; padding: 16px 0; border-bottom: 1px dashed ${LINE}; }
-      .terms-fee-line:last-of-type { border-bottom: none; }
-      .terms-fee-label {
-        font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
-        letter-spacing: 0.1em; text-transform: uppercase; color: ${MUTED};
-      }
-      .terms-fee-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; color: ${INK}; }
-      .terms-fee-note { font-size: 12px; color: ${MUTED}; line-height: 1.5; }
-
-      .terms-fee-total {
-        margin-top: 18px; padding-top: 16px; border-top: 1.5px solid ${LINE};
-        display: flex; align-items: baseline; justify-content: space-between;
-      }
-      .terms-fee-total-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: ${GOLD}; }
-      .terms-fee-total-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; color: ${GOLD}; }
-
-      .terms-excl-note {
-        margin-top: 16px; font-size: 11.5px; line-height: 1.55; color: ${MUTED};
-        padding: 12px 14px; border-radius: 8px; background: #ffffff; border: 1px dashed ${LINE};
-      }
-
-      @media (max-width: 760px) {
-        .terms-ticket { flex-direction: column; }
-        .terms-ticket-main { padding: 30px 26px; }
-        .terms-ticket-perf { width: auto; height: 0; border-left: none; border-top: 2px dashed ${LINE}; }
-        .terms-ticket-perf::before, .terms-ticket-perf::after { top: -13px; left: auto; }
-        .terms-ticket-perf::before { left: -13px; }
-        .terms-ticket-perf::after { right: -13px; left: auto; }
-        .terms-ticket-stub { border-radius: 0 0 16px 16px; padding: 30px 26px; }
-        .terms-doc-grid { grid-template-columns: 1fr; }
-      }
-
-      /* --- scope card (what's included) --- */
-      .terms-scope-card {
-        position: relative; border-radius: 10px; background: #ffffff;
-        border: 1px solid ${LINE}; padding: 24px;
-        transition: transform .35s ${EASE}, border-color .35s ${EASE}, box-shadow .35s ${EASE};
-      }
-      .terms-scope-card:hover { transform: translateY(-4px); border-color: ${GOLD}; box-shadow: 0 26px 46px -26px rgba(30,58,120,0.22); }
-      .terms-scope-icon {
-        width: 40px; height: 40px; border-radius: 10px;
-        background: ${GOLD_TINT}; border: 1px solid rgba(168,129,47,0.3);
-        display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: ${ROUTE};
-      }
-      .terms-scope-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14.5px; color: ${INK}; margin-bottom: 8px; }
-      .terms-scope-desc { font-size: 13px; line-height: 1.6; color: ${MUTED}; }
-
-      /* --- important note callout --- */
       .terms-note {
         position: relative; border-radius: 14px; overflow: hidden;
         background: ${PAPER_DIM}; border: 1px solid rgba(168,129,47,0.35);
-        padding: 32px 30px;
+        padding: 28px 28px;
       }
       .terms-note::before {
         content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
@@ -249,8 +184,40 @@ function GlobalStyle() {
         display: flex; align-items: center; justify-content: center; color: ${GOLD};
       }
       .terms-note-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15.5px; color: ${INK}; }
-      .terms-note p { font-size: 13.5px; line-height: 1.7; color: ${MUTED}; }
-      .terms-note p + p { margin-top: 12px; }
+      .terms-note p { font-size: 13.5px; line-height: 1.7; color: ${MUTED}; text-align: justify; hyphens: auto; }
+      .terms-note p + p { margin-top: 10px; }
+
+      /* =================================================================
+         AGB — ten numbered legal sections, "stamped" like a real
+         contract clause list rather than a wall of undifferentiated
+         text.
+      ================================================================= */
+      .terms-legal-stack { display: flex; flex-direction: column; gap: 18px; }
+      .terms-legal-section {
+        position: relative; border-radius: 14px; background: #ffffff;
+        border: 1px solid ${LINE}; padding: 28px 30px;
+      }
+      .terms-legal-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+      .terms-legal-num {
+        width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+        background: ${GOLD_TINT}; border: 1.5px solid rgba(168,129,47,0.4);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px; color: ${GOLD};
+      }
+      .terms-legal-title-wrap { display: flex; align-items: center; gap: 9px; }
+      .terms-legal-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16.5px; color: ${INK}; }
+      .terms-legal-body p { font-size: 13.5px; line-height: 1.75; color: ${MUTED}; text-align: justify; hyphens: auto; }
+      .terms-legal-body p + p { margin-top: 12px; }
+
+      .terms-todo {
+        display: flex; gap: 10px; margin-top: 16px;
+        background: ${GOLD_TINT}; border: 1px dashed rgba(168,129,47,0.5); border-radius: 9px;
+        padding: 12px 14px; font-size: 12.5px; line-height: 1.65; color: #6B5320;
+      }
+      .terms-todo svg { flex-shrink: 0; margin-top: 2px; color: ${GOLD}; }
+      .terms-todo strong { color: ${INK}; }
+
+      .terms-inline-link { color: ${ROUTE}; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 
       /* --- closing CTA, shared visual language with Home/About --- */
       .terms-boarding-panel {
@@ -293,10 +260,15 @@ function GlobalStyle() {
       .terms-boarding-cta:hover { background-position: 100% 0; transform: translateY(-2px); }
       .terms-boarding-cta:active { transform: translateY(0) scale(.98); }
 
+      .terms-updated {
+        text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+        letter-spacing: 0.08em; color: ${MUTED}; margin-top: 10px;
+      }
+
       @media (max-width: 640px) {
         .terms-boarding-panel { padding: 40px 20px; border-radius: 10px; }
         .terms-boarding-cta { width: 100%; justify-content: center; padding: 14px 22px; }
-        .terms-intro-card { padding: 26px 22px; }
+        .terms-intro-card, .terms-legal-section { padding: 24px 22px; }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -340,24 +312,26 @@ function SectionHeading({ eyebrow, title, emphasis, sub }) {
   );
 }
 
-function DocItem({ children }) {
+function TodoNote({ children }) {
   return (
-    <div className="terms-doc-item">
-      <CheckCircle2 size={16} strokeWidth={2} />
-      <span>{children}</span>
+    <div className="terms-todo">
+      <AlertTriangle size={16} strokeWidth={2} />
+      <span><strong>To confirm before publishing: </strong>{children}</span>
     </div>
   );
 }
 
-function ScopeCard({ icon: Icon, title, desc, delay }) {
+function LegalSection({ num, title, children }) {
   return (
-    <Reveal delay={delay}>
-      <div className="terms-scope-card h-full">
-        <div className="terms-scope-icon">
-          <Icon size={18} strokeWidth={1.75} />
+    <Reveal>
+      <div className="terms-legal-section" id={`agb-${num}`}>
+        <div className="terms-legal-head">
+          <span className="terms-legal-num">§{num}</span>
+          <div className="terms-legal-title-wrap">
+            <span className="terms-legal-title">{title}</span>
+          </div>
         </div>
-        <div className="terms-scope-title">{title}</div>
-        <div className="terms-scope-desc">{desc}</div>
+        <div className="terms-legal-body">{children}</div>
       </div>
     </Reveal>
   );
@@ -372,19 +346,6 @@ export default function TermsAndConditions() {
     }
     window.scrollTo(0, 0);
   }, []);
-
-  const documents = [
-    "Bachelor's certificate (for Master's applicants)",
-    "Bachelor's transcripts (for Master's applicants)",
-    'Official grading system / scale from your university',
-    'Letter of recommendation from a professor',
-    'HSC (Higher Secondary Certificate) certificate and transcript',
-    'SSC (Secondary School Certificate) certificate and transcript',
-    'Language certificate (IELTS or equivalent)',
-    'Medium of Instruction certificate',
-    'Passport copy',
-    'One passport-size photograph',
-  ];
 
   return (
     <div className="terms-root">
@@ -404,7 +365,7 @@ export default function TermsAndConditions() {
               Terms &amp; <span className="foil">Conditions</span>
             </h1>
             <p className="mt-4 max-w-xl text-sm md:text-base leading-relaxed" style={{ color: MUTED }}>
-              What we ask for, what we charge, and what we actually do once you agree to work with us.
+              The full legal terms that govern Euro Feather's paid consultancy service.
             </p>
           </Reveal>
         </div>
@@ -412,142 +373,230 @@ export default function TermsAndConditions() {
 
       <RouteDivider />
 
-      {/* INTRO / SCOPE */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <Reveal>
-          <div className="terms-intro-card">
-            <p>
-              Thank you for reaching out. Once you agree to the terms set out on this page,
-              we will handle your application on your behalf — from your first shortlist to
-              the day you arrive in Germany. Below is what we ask you to prepare, what our
-              service costs, and exactly where our responsibility begins and ends.
-            </p>
-            <p>
-              By booking a consultation or sending us your documents, you confirm that you have
-              read and agree to the terms described here.
-            </p>
-          </div>
-        </Reveal>
-      </section>
-
-      <RouteDivider />
-
-      {/* DOCUMENT CHECKLIST + FEE TICKET */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <SectionHeading
-          eyebrow="Before you apply"
-          title="Documents &amp;"
-          emphasis="Charges"
-          sub="One coupon for what to prepare, one stub for what it costs — the two things worth checking before you commit."
-        />
-        <Reveal>
-          <div className="terms-ticket">
-            {/* documents coupon */}
-            <div className="terms-ticket-main">
-              <div className="terms-ticket-kicker">
-                <ClipboardList size={14} />
-                Required Documents — Bachelor's &amp; Master's
-              </div>
-              <div className="terms-doc-grid">
-                {documents.map((doc) => (
-                  <DocItem key={doc}>{doc}</DocItem>
-                ))}
-              </div>
-            </div>
-
-            <div className="terms-ticket-perf" aria-hidden="true" />
-
-            {/* fee stub */}
-            <div className="terms-ticket-stub">
-              <div className="terms-ticket-kicker">
-                <CreditCard size={14} />
-                Service Charges
-              </div>
-
-              <div className="terms-fee-line">
-                <span className="terms-fee-label">Initial Fee</span>
-                <span className="terms-fee-value">€150</span>
-                <span className="terms-fee-note">Charged after we review your profile and shortlist suitable universities.</span>
-              </div>
-
-              <div className="terms-fee-line">
-                <span className="terms-fee-label">Remaining Fee</span>
-                <span className="terms-fee-value">€1,000</span>
-                <span className="terms-fee-note">Payable after you receive your visa or arrive in Germany.</span>
-              </div>
-
-              <div className="terms-fee-total">
-                <span className="terms-fee-total-label">Total Service Fee</span>
-                <span className="terms-fee-total-value">€1,150</span>
-              </div>
-
-              <div className="terms-excl-note">
-                University application fees and Uni-Assist fees are <strong style={{ color: INK }}>not included</strong> in
-                our service charges and must be paid separately by the applicant.
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      <RouteDivider />
-
-      {/* WHAT WE HANDLE */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <SectionHeading
-          eyebrow="Start to finish"
-          title="What Our"
-          emphasis="Support Covers"
-          sub="You provide the documents above — we handle everything else, from the first application to your first weeks in Germany."
-        />
-        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <ScopeCard
-            icon={FileCheck2}
-            title="Application to Visa"
-            desc="We manage the entire application process from the initial stage until you receive your visa."
-            delay={0}
-          />
-          <ScopeCard
-            icon={Plane}
-            title="Arrival in Germany"
-            desc="Support continues right up to your arrival — you only need to supply the documents we ask for."
-            delay={80}
-          />
-          <ScopeCard
-            icon={HandHeart}
-            title="After You Land"
-            desc="We can also help with accommodation search, residence permit applications, and other first-week steps."
-            delay={160}
-          />
-        </div>
-      </section>
-
-      <RouteDivider />
-
-      {/* IMPORTANT NOTE */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
+      {/* BEFORE YOU PUBLISH */}
+      <section className="max-w-5xl mx-auto px-6 py-16">
         <Reveal>
           <div className="terms-note">
             <div className="terms-note-head">
               <div className="terms-note-icon">
-                <ShieldAlert size={18} strokeWidth={1.75} />
+                <AlertTriangle size={18} strokeWidth={1.75} />
               </div>
-              <span className="terms-note-title">A note on who we are</span>
+              <span className="terms-note-title">Before this page goes live</span>
             </div>
             <p>
-              We would like to clarify that we are not an agency. We understand that the
-              application process can be time-consuming and sometimes overwhelming for
-              students. It is entirely possible to apply independently using resources such as
-              university websites and online guides — some applicants simply prefer guided
-              support for added confidence.
+              This page is built from the service description and AGB text you provided. Your contract
+              process, tax status and dispute-resolution participation are now filled in based on your
+              answers — the one thing still missing is Euro Feather's full legal/registered business
+              name and complete address, flagged in the gold box in § 1 below.
             </p>
             <p>
-              If you require step-by-step assistance over a longer period, we ask a reasonable
-              service fee for our time and effort. For general questions or basic guidance,
-              we are always happy to help free of charge.
+              We'd still recommend a final read-through by a lawyer familiar with German
+              consumer-protection law (the BGB provisions referenced below) before publishing this page
+              live — particularly the withdrawal notice in § 6, which follows the standard EU/German
+              template but hasn't been checked against your exact service.
             </p>
           </div>
         </Reveal>
+      </section>
+
+      <RouteDivider />
+
+      {/* ============================= AGB ============================= */}
+      <section id="agb" className="max-w-5xl mx-auto px-6 py-16">
+        <SectionHeading
+          eyebrow="Legal"
+          title="Terms and Conditions"
+          emphasis="(AGB)"
+          sub="Ten numbered clauses covering how a contract is formed, what each side is responsible for, pricing, cancellation, liability and applicable law."
+        />
+
+        <div className="terms-legal-stack">
+          <LegalSection num="1" title="Provider and scope">
+            <p>
+              These terms apply to paid education and university application support provided by
+              Euro Feather, based in Frankfurt, Germany, reachable at eurofeather.de@gmail.com
+              ("Euro Feather"), to individual customers ("students"). Free website and YouTube content
+              is general information and does not itself create a paid service contract.
+            </p>
+            <p>
+              The individual written offer and any specifically agreed service description take
+              precedence over these terms where they differ. These terms do not restrict mandatory
+              consumer rights.
+            </p>
+            <TodoNote>
+              Euro Feather's full legal/registered business name, complete street address, and
+              commercial register number (if registered as a company) still need to be added here.
+            </TodoNote>
+          </LegalSection>
+
+          <LegalSection num="2" title="Services and contract formation">
+            <p>
+              Euro Feather describes the agreed tasks, number of applications, service period, fee,
+              payment schedule and any additional charges in an individual offer sent to the student.
+              A contract is formed when the student replies to that written offer by email accepting
+              it, and Euro Feather confirms that acceptance in writing by email. An enquiry or a free
+              consultation does not itself oblige the student to buy a service.
+            </p>
+            <p>
+              Work outside the agreed scope requires a separate agreement and a disclosed additional
+              price. Euro Feather may provide practical assistance with forms and documents but does
+              not decide eligibility or act as a university, immigration authority or lawyer.
+            </p>
+          </LegalSection>
+
+          <LegalSection num="3" title="Working with the student">
+            <p>
+              The student supplies accurate, complete and authentic information and documents in time
+              for the agreed work. The student checks application details and final materials before
+              submission, where reasonably possible, and promptly forwards relevant communications
+              from universities. The student remains responsible for statements and documents made in
+              their name and for any third-party application fees.
+            </p>
+            <p>
+              Applications are prepared together with the student. Euro Feather submits an application
+              on the student's behalf only with the student's specific authorization for that
+              application or platform. The student creates and controls any dedicated application
+              email account. How Euro Feather accesses that account, if access is necessary, is agreed
+              separately; the student may change or revoke access when the service ends. Euro Feather
+              will not intentionally submit forged or misleading documents.
+            </p>
+          </LegalSection>
+
+          <LegalSection num="4" title="Timing and third parties">
+            <p>
+              The student and Euro Feather agree practical deadlines in light of the universities'
+              published deadlines. University portals, admissions decisions and third-party processing
+              times are outside Euro Feather's control. Euro Feather will inform the student promptly
+              if information or documents needed for an agreed task are missing, or if a material
+              problem with the agreed timetable becomes known.
+            </p>
+          </LegalSection>
+
+          <LegalSection num="5" title="Price and payment">
+            <p>
+              Euro Feather qualifies as a small business (Kleinunternehmer) under § 19 UStG. Prices
+              shown to students are therefore final prices with no VAT added, and invoices issued do
+              not show a separate VAT amount, in line with § 19 UStG. The total fee, included services,
+              accepted payment methods and payment due dates are shown in the individual written offer
+              before the student accepts it. Third-party charges (university, Uni-Assist, translation,
+              certification and language-test fees) are payable separately by the student unless
+              expressly included in the offer. Euro Feather provides an invoice or payment confirmation
+              as required.
+            </p>
+            <TodoNote>
+              Confirm the exact prices and payment due dates for every current package (beyond the
+              initial/remaining-fee split shown above), and double-check with your accountant that the
+              Kleinunternehmer exemption still applies once your annual revenue is known.
+            </TodoNote>
+          </LegalSection>
+
+          <LegalSection num="6" title="Ending the service, cancellation and withdrawal">
+            <p>
+              Unless a specific written offer states otherwise, the standard service ends once the
+              agreed applications have been completed and submission confirmations delivered; visa
+              guidance, arrival support, accommodation search and residence-permit assistance are
+              included only where the written offer expressly says so. The student may request a
+              change to, or end, the service by contacting eurofeather.de@gmail.com. Euro Feather will
+              explain any work already performed and the applicable payment or refund position under
+              the agreement and mandatory law — no blanket "non-refundable" rule applies.
+            </p>
+
+            <p style={{ marginTop: 18, fontWeight: 700, color: INK }}>Right of withdrawal</p>
+            <p>
+              You have the right to withdraw from this contract within 14 days without giving any
+              reason. The withdrawal period expires 14 days from the day the contract is concluded
+              (see § 2 above). To exercise your right of withdrawal, you must inform us — Euro Feather,
+              [full legal name and address to be inserted], eurofeather.de@gmail.com — of your decision
+              by a clear statement (e.g. a letter sent by post or an email). You may use the model
+              withdrawal form below, but it is not obligatory. To meet the withdrawal deadline, it is
+              enough to send your notice of withdrawal before the 14-day period has expired.
+            </p>
+            <p>
+              If you withdraw, we will reimburse all payments received from you without undue delay,
+              and in any event not later than 14 days from the day we are informed of your decision to
+              withdraw, using the same means of payment you used for the original transaction, unless
+              expressly agreed otherwise. If you expressly requested that work begin during the
+              withdrawal period and later withdraw, you must pay an amount proportional to the work
+              already performed compared with the full scope of the contract.
+            </p>
+
+            <p style={{ marginTop: 18, fontWeight: 700, color: INK }}>Model withdrawal form</p>
+            <p>(Complete and return this form only if you wish to withdraw from the contract.)</p>
+            <p>
+              To: Euro Feather, [full legal name and address to be inserted], eurofeather.de@gmail.com
+              <br />
+              I/We hereby give notice that I/we withdraw from my/our contract for the provision of the
+              following service: [describe the service]
+              <br />
+              Ordered on: [date]
+              <br />
+              Name of consumer(s): [name]
+              <br />
+              Address of consumer(s): [address]
+              <br />
+              Signature of consumer(s) (only if this form is submitted on paper): [signature]
+              <br />
+              Date: [date]
+            </p>
+
+            <TodoNote>
+              This withdrawal notice and model form follow the standard EU/German template, but still
+              needs (1) your full legal name and address inserted in both places above, and (2) a
+              lawyer's confirmation that it matches your actual service. Since contracts are formed by
+              email rather than an automated online checkout, the electronic withdrawal button required
+              by § 356a BGB likely does not apply to you yet — revisit this if you later add online
+              payment or an ordering button to the website.
+            </TodoNote>
+          </LegalSection>
+
+          <LegalSection num="7" title="Outcomes and responsibility">
+            <p>
+              Euro Feather performs the agreed services with reasonable care. A university, scholarship
+              provider, visa authority or other third party makes its own decisions. No admission,
+              funding, appointment, visa or immigration outcome is promised. Euro Feather does not
+              limit liability where the law does not permit a limitation, including liability for
+              injury to life, body or health, intent or gross negligence.
+            </p>
+          </LegalSection>
+
+          <LegalSection num="8" title="Personal data and documents">
+            <p>
+              Our{' '}
+              <a className="terms-inline-link" href="/privacy">Privacy Policy</a>{' '}
+              explains how Euro Feather handles student documents and communications. At the end of the
+              agreed service, Euro Feather deletes application working copies that are no longer
+              needed, subject to legal retention duties and the exceptions explained there. Copies
+              submitted to universities or application platforms are governed by those organisations'
+              own practices.
+            </p>
+          </LegalSection>
+
+          <LegalSection num="9" title="Complaints and contact">
+            <p>
+              Students can send questions or complaints to{' '}
+              <a className="terms-inline-link" href="mailto:eurofeather.de@gmail.com">eurofeather.de@gmail.com</a>.
+            </p>
+            <p>
+              Euro Feather is willing to take part in dispute-resolution proceedings before a consumer
+              arbitration board (Verbraucherschlichtungsstelle). The competent body is the General
+              Consumer Arbitration Board of the Center for Conciliation e.V. (Allgemeine
+              Verbraucherschlichtungsstelle des Zentrums für Schlichtung e.V.), Straßburger Straße 8,
+              77694 Kehl am Rhein, Germany — www.verbraucher-schlichter.de.
+            </p>
+            <TodoNote>
+              Confirm you're comfortable naming this general arbitration board specifically (it's the
+              standard default for businesses without a sector-specific one), or provide the name of a
+              different board if you've already registered with one.
+            </TodoNote>
+          </LegalSection>
+
+          <LegalSection num="10" title="Applicable law">
+            <p>
+              German law applies, without depriving a consumer of mandatory protection that applies
+              under the law of their habitual residence. Statutory jurisdiction rules remain unaffected.
+            </p>
+          </LegalSection>
+        </div>
       </section>
 
       {/* CLOSING CTA */}
@@ -564,11 +613,12 @@ export default function TermsAndConditions() {
             </h2>
             <p className="mt-4 max-w-lg mx-auto text-sm leading-relaxed" style={{ color: MUTED }}>
               Reach out any time — general questions are always free, and we'll never start
-              charging without your agreement first.
+              charging without your written agreement first.
             </p>
             <a href="/contact" className="terms-boarding-cta">
               Contact Us <ArrowRight size={16} />
             </a>
+            <div className="terms-updated">Last updated: September 2026</div>
           </div>
         </Reveal>
       </section>

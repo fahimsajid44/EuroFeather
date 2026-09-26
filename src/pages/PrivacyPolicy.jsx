@@ -9,10 +9,13 @@ import {
   Lock,
   Cookie,
   FileText,
-  MessageCircleHeart,
   Plane,
   ArrowRight,
   ShieldAlert,
+  Globe2,
+  Mail,
+  CreditCard,
+  Scale,
 } from 'lucide-react';
 
 /* ---------------------------------------------------------------
@@ -21,6 +24,10 @@ import {
    field, sapphire route line, single gilt accent, Space Grotesk /
    Inter / JetBrains Mono. Class names stay namespaced "privacy-"
    to avoid collision with the other pages' identical tokens.
+
+   Content below is adapted from the Euro Feather Datenschutzerklärung.
+   Fields still in [brackets] need to be filled in with the real
+   controller / provider details before this goes live.
 ------------------------------------------------------------------*/
 const INK = '#0A0F1F';
 const PAPER = '#FAF9F5';
@@ -114,6 +121,14 @@ function GlobalStyle() {
         50% { background-position: 100% 50%; }
       }
 
+      /* --- justified body copy, applied everywhere prose appears --- */
+      .privacy-justify {
+        text-align: justify;
+        text-align-last: left;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+      }
+
       .privacy-route-divider { position: relative; max-width: 1280px; margin: 0 auto; padding: 0 24px; }
       .privacy-route-divider::before { content: ''; display: block; height: 0; border-top: 1.5px dashed ${LINE}; }
       .privacy-route-divider .waypoint {
@@ -140,7 +155,7 @@ function GlobalStyle() {
         opacity: 0.55; pointer-events: none;
       }
 
-      /* --- intro card --- */
+      /* --- intro / controller card --- */
       .privacy-intro-card {
         position: relative; border-radius: 14px; background: #ffffff;
         border: 1px solid ${LINE}; padding: 34px 32px;
@@ -149,6 +164,14 @@ function GlobalStyle() {
       .privacy-intro-card p { font-size: 14.5px; line-height: 1.75; color: ${MUTED}; }
       .privacy-intro-card p + p { margin-top: 14px; }
       .privacy-intro-card strong { color: ${INK}; font-weight: 700; }
+
+      .privacy-controller-grid {
+        margin-top: 18px; padding-top: 18px; border-top: 1px dashed ${LINE};
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px;
+        font-family: 'JetBrains Mono', monospace; font-size: 12px; color: ${INK};
+      }
+      .privacy-controller-grid span { color: ${MUTED}; }
+      @media (max-width: 640px) { .privacy-controller-grid { grid-template-columns: 1fr; } }
 
       /* --- data-collected ticket (two coupons, one perforation) --- */
       .privacy-ticket {
@@ -189,7 +212,7 @@ function GlobalStyle() {
         .privacy-ticket-stub { border-radius: 0 0 16px 16px; padding: 30px 26px; }
       }
 
-      /* --- scope / use / share cards --- */
+      /* --- scope / use / share / process cards --- */
       .privacy-scope-card {
         position: relative; border-radius: 10px; background: #ffffff;
         border: 1px solid ${LINE}; padding: 24px; height: 100%;
@@ -202,7 +225,12 @@ function GlobalStyle() {
         display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: ${ROUTE};
       }
       .privacy-scope-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14.5px; color: ${INK}; margin-bottom: 8px; }
-      .privacy-scope-desc { font-size: 13px; line-height: 1.6; color: ${MUTED}; }
+      .privacy-scope-desc { font-size: 13px; line-height: 1.65; color: ${MUTED}; }
+      .privacy-scope-basis {
+        margin-top: 10px; display: inline-block; font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px; letter-spacing: 0.04em; color: ${ROUTE}; background: ${ROUTE_TINT};
+        border: 1px solid rgba(30,58,120,0.18); border-radius: 6px; padding: 3px 8px;
+      }
 
       /* --- rights checklist card --- */
       .privacy-rights-card {
@@ -217,7 +245,12 @@ function GlobalStyle() {
       .privacy-right-item-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13.5px; color: ${INK}; }
       .privacy-right-item-desc { font-size: 12.5px; color: ${MUTED}; line-height: 1.55; margin-top: 2px; }
 
-      /* --- note callout (cookies / security) --- */
+      .privacy-complaint-note {
+        margin-top: 24px; padding-top: 20px; border-top: 1px dashed ${LINE};
+        font-size: 13px; line-height: 1.7; color: ${MUTED};
+      }
+
+      /* --- note callout (retention / cookies / transfers / changes) --- */
       .privacy-note {
         position: relative; border-radius: 14px; overflow: hidden;
         background: ${PAPER_DIM}; border: 1px solid rgba(168,129,47,0.35);
@@ -322,7 +355,7 @@ function SectionHeading({ eyebrow, title, emphasis, sub }) {
         {title} {emphasis && <span className="foil">{emphasis}</span>}
       </h2>
       {sub && (
-        <p className="mt-4 max-w-xl text-sm leading-relaxed" style={{ color: MUTED }}>
+        <p className="privacy-justify mt-4 max-w-xl text-sm leading-relaxed" style={{ color: MUTED }}>
           {sub}
         </p>
       )}
@@ -330,16 +363,7 @@ function SectionHeading({ eyebrow, title, emphasis, sub }) {
   );
 }
 
-function DocItem({ children }) {
-  return (
-    <div className="privacy-doc-item">
-      <CheckCircle2 size={16} strokeWidth={2} />
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function ScopeCard({ icon: Icon, title, desc, delay }) {
+function ScopeCard({ icon: Icon, title, desc, basis, delay }) {
   return (
     <Reveal delay={delay}>
       <div className="privacy-scope-card">
@@ -347,7 +371,8 @@ function ScopeCard({ icon: Icon, title, desc, delay }) {
           <Icon size={18} strokeWidth={1.75} />
         </div>
         <div className="privacy-scope-title">{title}</div>
-        <div className="privacy-scope-desc">{desc}</div>
+        <div className="privacy-scope-desc privacy-justify">{desc}</div>
+        {basis && <span className="privacy-scope-basis">{basis}</span>}
       </div>
     </Reveal>
   );
@@ -359,7 +384,7 @@ function RightItem({ title, desc }) {
       <CheckCircle2 size={16} strokeWidth={2} />
       <div>
         <div className="privacy-right-item-title">{title}</div>
-        <div className="privacy-right-item-desc">{desc}</div>
+        <div className="privacy-right-item-desc privacy-justify">{desc}</div>
       </div>
     </div>
   );
@@ -374,15 +399,6 @@ export default function PrivacyPolicy() {
     }
     window.scrollTo(0, 0);
   }, []);
-
-  const providedInfo = [
-    'Full name and date of birth',
-    'Email address, phone number and WhatsApp contact',
-    'Academic certificates and transcripts',
-    'Language certificates (e.g. IELTS)',
-    'Passport copy and photograph',
-    'Any information you share with us directly, by email or WhatsApp',
-  ];
 
   return (
     <div className="privacy-root">
@@ -401,8 +417,9 @@ export default function PrivacyPolicy() {
             <h1 className="privacy-title mt-4 text-4xl md:text-5xl">
               Privacy <span className="foil">Policy</span>
             </h1>
-            <p className="mt-4 max-w-xl text-sm md:text-base leading-relaxed" style={{ color: MUTED }}>
-              What we collect, why we collect it, and who we share it with — in plain language.
+            <p className="privacy-justify mt-4 max-w-xl text-sm md:text-base leading-relaxed mx-auto" style={{ color: MUTED }}>
+              What we process, why we process it, and who we share it with — in plain language,
+              alongside the legal basis under the GDPR.
             </p>
           </Reveal>
         </div>
@@ -410,62 +427,27 @@ export default function PrivacyPolicy() {
 
       <RouteDivider />
 
-      {/* INTRO */}
+      {/* 1. CONTROLLER & CONTACT */}
       <section className="max-w-5xl mx-auto px-6 py-20">
+        <SectionHeading
+          eyebrow="Section 1"
+          title="Controller &amp;"
+          emphasis="Contact"
+        />
         <Reveal>
           <div className="privacy-intro-card">
-            <p>
-              Euro Feather ("we", "us", "our") provides overseas education consultancy
-              services. This policy explains what personal information we collect when you
-              use our website or work with us on your application, how we use it, and the
-              choices you have about it.
+            <p className="privacy-justify">
+              The controller responsible for this website and the Euro Feather consultancy
+              service is <strong>[Full legal name / legal entity]</strong>, trading as{' '}
+              <strong>Euro Feather</strong>. If we have appointed a data protection officer,
+              their contact details are provided below as well.
             </p>
-            <p>
-              By contacting us, booking a consultation, or sending us your documents, you
-              agree to the collection and use of information as described in this policy.
-            </p>
-          </div>
-        </Reveal>
-      </section>
-
-      <RouteDivider />
-
-      {/* WHAT WE COLLECT */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <SectionHeading
-          eyebrow="Information"
-          title="What We"
-          emphasis="Collect"
-          sub="Only what's needed to actually process your application — nothing sold, nothing collected for its own sake."
-        />
-        <Reveal>
-          <div className="privacy-ticket">
-            {/* provided by you */}
-            <div className="privacy-ticket-main">
-              <div className="privacy-ticket-kicker">
-                <UserCheck size={14} />
-                Information You Provide
-              </div>
-              {providedInfo.map((item) => (
-                <DocItem key={item}>{item}</DocItem>
-              ))}
-            </div>
-
-            <div className="privacy-ticket-perf" aria-hidden="true" />
-
-            {/* collected automatically */}
-            <div className="privacy-ticket-stub">
-              <div className="privacy-ticket-kicker">
-                <Cookie size={14} />
-                Collected Automatically
-              </div>
-              <DocItem>Browser type and device information</DocItem>
-              <DocItem>Pages visited and time spent on our site</DocItem>
-              <DocItem>General location, from your IP address</DocItem>
-              <div className="privacy-doc-note">
-                We use this only to understand how our site is used and to keep it working
-                correctly — see "Cookies" below.
-              </div>
+            <div className="privacy-controller-grid">
+              <div><span>Trading name:</span> Euro Feather</div>
+              <div><span>Address:</span> [Business postal address]</div>
+              <div><span>Email:</span> [privacy contact email]</div>
+              <div><span>Telephone:</span> [Telephone, if used]</div>
+              <div><span>Data protection officer:</span> [details, if appointed]</div>
             </div>
           </div>
         </Reveal>
@@ -473,63 +455,80 @@ export default function PrivacyPolicy() {
 
       <RouteDivider />
 
-      {/* HOW WE USE IT */}
+      {/* 2. WHAT WE PROCESS AND WHY */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <SectionHeading
-          eyebrow="Purpose"
-          title="How We"
-          emphasis="Use Your Information"
-          sub="Every piece of information we ask for goes toward one of these three things."
+          eyebrow="Section 2"
+          title="What We Process"
+          emphasis="&amp; Why"
+          sub="Every category below explains what we collect, what we use it for, and the legal basis we rely on under the GDPR."
         />
-        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <ScopeCard
-            icon={FileText}
-            title="Processing Your Application"
-            desc="Reviewing your profile, shortlisting universities, and preparing and submitting your application and visa documents."
+            icon={Globe2}
+            title="Website Visits"
+            desc="When you open the website, our hosting provider may process technical information such as your IP address, date and time of access, requested page, browser information and server logs to deliver and protect the site."
+            basis="Art. 6(1)(f) GDPR"
             delay={0}
           />
           <ScopeCard
-            icon={MessageCircleHeart}
-            title="Communicating With You"
-            desc="Replying to your questions, sending updates on your application, and reaching you by email or WhatsApp when needed."
-            delay={80}
+            icon={Mail}
+            title="Free Enquiries"
+            desc="If you email us or use a contact form to request free advice, we process your name, contact information and message in order to respond to you."
+            basis="Art. 6(1)(b) / 6(1)(f) GDPR"
+            delay={60}
           />
           <ScopeCard
-            icon={Lock}
-            title="Keeping Our Service Secure"
-            desc="Protecting your account and documents from unauthorized access, and improving how our website works."
-            delay={160}
+            icon={FileText}
+            title="Paid Application Support"
+            desc="To provide the agreed service, we process what you send us — contact details, CV, transcripts, certificates, language results, application statements, correspondence and application documents — to assess requirements and prepare and submit your applications."
+            basis="Art. 6(1)(b) GDPR"
+            delay={120}
+          />
+          <ScopeCard
+            icon={UserCheck}
+            title="Application Email &amp; Accounts"
+            desc="You create and control the email account used for applications. If you give us access to assist with agreed tasks, we use it only for that purpose, and you can withdraw our access once the agreed work ends."
+            basis="Art. 6(1)(b) GDPR"
+            delay={180}
+          />
+          <ScopeCard
+            icon={CreditCard}
+            title="Payments &amp; Records"
+            desc="We process contract and payment information to administer payments, issue invoices and meet our accounting and tax duties."
+            basis="Art. 6(1)(b) / 6(1)(c) GDPR"
+            delay={240}
           />
         </div>
       </section>
 
       <RouteDivider />
 
-      {/* WHO WE SHARE WITH */}
+      {/* 3. WHO RECEIVES THE INFORMATION */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <SectionHeading
-          eyebrow="Disclosure"
-          title="Who We"
-          emphasis="Share It With"
-          sub="We only share what's needed to move your application forward — never for marketing, and never sold."
+          eyebrow="Section 3"
+          title="Who Receives"
+          emphasis="This Information"
+          sub="We only share what's needed to move your application forward. We never sell your documents or use them for advertising or testimonials without a separate, appropriate basis."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <ScopeCard
             icon={Building2}
-            title="Universities &amp; Uni-Assist"
-            desc="Your academic documents and application are shared with the universities and platforms you're applying through."
+            title="Universities &amp; Platforms"
+            desc="As needed for the agreed applications, your information is sent to the universities and application platforms selected together with you, such as [list platforms actually used]. Those organisations process submitted applications under their own privacy notices."
             delay={0}
-          />
-          <ScopeCard
-            icon={Landmark}
-            title="Embassies &amp; Authorities"
-            desc="Your documents may be shared with German embassies, consulates or immigration authorities as part of your visa process."
-            delay={80}
           />
           <ScopeCard
             icon={ShieldAlert}
             title="Service Providers"
-            desc="Trusted tools we rely on to run our business — such as email and document storage — under confidentiality obligations."
+            desc="Providers who process data on our behalf, such as [email provider], [cloud document storage], [website host], [booking provider] and [payment provider], under appropriate processing agreements where required."
+            delay={80}
+          />
+          <ScopeCard
+            icon={Landmark}
+            title="Assistants &amp; Contractors"
+            desc="[If assistants or contractors — including anyone outside the EU/EEA — can access student documents, their role and location are identified here, along with the applicable safeguard. If none, only the authorized Euro Feather operator has access.]"
             delay={160}
           />
         </div>
@@ -537,23 +536,62 @@ export default function PrivacyPolicy() {
 
       <RouteDivider />
 
-      {/* YOUR RIGHTS */}
+      {/* 4. TRANSFERS OUTSIDE THE EU/EEA */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <Reveal>
+            <div className="privacy-note">
+              <div className="privacy-note-head">
+                <div className="privacy-note-icon">
+                  <Plane size={18} strokeWidth={1.75} />
+                </div>
+                <span className="privacy-note-title">Transfers Outside the EU/EEA</span>
+              </div>
+              <p className="privacy-justify">
+                Applications to universities or service providers outside the EU/EEA, use of
+                providers located there, or remote access by staff or contractors there, may
+                involve an international transfer of personal data. [Describe the actual
+                destinations, recipients and applicable transfer basis or safeguards; remove
+                this notice only if no such transfers occur.]
+              </p>
+              <p className="privacy-justify">
+                Contact <strong>[privacy email]</strong> to request information about applicable
+                safeguards. Your own application to an institution outside the EU/EEA is treated
+                separately from transfers to Euro Feather's service providers.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <RouteDivider />
+
+      {/* 5. YOUR RIGHTS */}
       <section className="max-w-5xl mx-auto px-6 py-20">
         <SectionHeading
-          eyebrow="Your control"
+          eyebrow="Section 7"
           title="Your"
           emphasis="Rights"
-          sub="Depending on where you live, you have some or all of the following rights over your data."
+          sub="Subject to the statutory conditions, the following rights are available to you under the GDPR."
         />
         <Reveal>
           <div className="privacy-rights-card">
             <div className="privacy-rights-grid">
-              <RightItem title="Access" desc="Ask us what personal data we hold about you." />
-              <RightItem title="Correction" desc="Ask us to correct inaccurate or incomplete data." />
-              <RightItem title="Deletion" desc="Ask us to delete your data once it's no longer needed." />
-              <RightItem title="Restriction" desc="Ask us to limit how we use your data in certain cases." />
+              <RightItem title="Access" desc="Request access to the personal data we hold about you." />
+              <RightItem title="Rectification" desc="Ask us to correct inaccurate or incomplete data." />
+              <RightItem title="Erasure" desc="Ask us to delete your data, subject to statutory conditions." />
+              <RightItem title="Restriction" desc="Ask us to restrict processing in certain cases." />
               <RightItem title="Portability" desc="Request a copy of your data in a portable format." />
-              <RightItem title="Withdraw consent" desc="Withdraw consent at any time for optional processing." />
+              <RightItem title="Object" desc="Object to processing based on Article 6(1)(f) GDPR." />
+              <RightItem title="Withdraw consent" desc="Withdraw any consent at any time, with future effect." />
+              <RightItem title="Complain" desc="Lodge a complaint with a data protection supervisory authority." />
+            </div>
+            <div className="privacy-complaint-note privacy-justify">
+              To exercise any of these rights, contact <strong>[privacy email]</strong>. For a
+              controller established in Rhineland-Palatinate, the competent supervisory authority
+              is generally the State Commissioner for Data Protection and Freedom of Information
+              of Rhineland-Palatinate. [Check the actual place of establishment and supervisory
+              authority before publishing.]
             </div>
           </div>
         </Reveal>
@@ -561,8 +599,13 @@ export default function PrivacyPolicy() {
 
       <RouteDivider />
 
-      {/* RETENTION + COOKIES */}
+      {/* 6/7. RETENTION + COOKIES */}
       <section className="max-w-7xl mx-auto px-6 py-20">
+        <SectionHeading
+          eyebrow="Sections 5 &amp; 6"
+          title="Retention"
+          emphasis="&amp; Cookies"
+        />
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <Reveal delay={0}>
             <div className="privacy-note">
@@ -570,15 +613,20 @@ export default function PrivacyPolicy() {
                 <div className="privacy-note-icon">
                   <Lock size={18} strokeWidth={1.75} />
                 </div>
-                <span className="privacy-note-title">Data Retention &amp; Security</span>
+                <span className="privacy-note-title">Retention &amp; Deletion</span>
               </div>
-              <p>
-                We keep your information only for as long as needed to complete your
-                application, meet legal requirements, or as agreed with you directly.
+              <p className="privacy-justify">
+                We keep application documents and working copies only while needed for the
+                agreed service. When the service ends, we delete copies no longer needed from
+                systems under our control within <strong>[insert a realistic period, e.g. 30 days]</strong>.
+                The same rule applies if an application is refused, withdrawn or abandoned.
               </p>
-              <p>
-                We take reasonable technical and organizational steps to protect your data,
-                but no method of storage or transmission over the internet is ever 100% secure.
+              <p className="privacy-justify">
+                Technical backups are deleted or overwritten according to{' '}
+                <strong>[actual backup cycle]</strong> and are not used for ordinary service
+                work. Invoices and accounting records are kept for the periods required by law.
+                Documents already sent to a university or platform are retained by that
+                recipient under its own rules; we cannot delete the recipient's copies.
               </p>
             </div>
           </Reveal>
@@ -588,16 +636,41 @@ export default function PrivacyPolicy() {
                 <div className="privacy-note-icon">
                   <Cookie size={18} strokeWidth={1.75} />
                 </div>
-                <span className="privacy-note-title">Cookies</span>
+                <span className="privacy-note-title">Cookies &amp; Analytics</span>
               </div>
-              <p>
-                Our website uses basic cookies to remember your preferences and understand how
-                visitors use our site. You can disable cookies in your browser settings, though
-                some parts of the site may not work as well as a result.
+              <p className="privacy-justify">
+                [Describe every cookie or similar technology actually used, its provider,
+                purpose and duration. Identify what is strictly necessary for the requested
+                site service and what requires consent under § 25 TDDDG.]
+              </p>
+              <p className="privacy-justify">
+                If analytics tools, advertising tools or embedded videos load third-party
+                content, we describe their operation and consent mechanism here, and provide a
+                way to withdraw consent where required.
               </p>
             </div>
           </Reveal>
         </div>
+      </section>
+
+      <RouteDivider />
+
+      {/* 8. CHANGES */}
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <Reveal>
+          <div className="privacy-note">
+            <div className="privacy-note-head">
+              <div className="privacy-note-icon">
+                <Scale size={18} strokeWidth={1.75} />
+              </div>
+              <span className="privacy-note-title">Changes to This Policy</span>
+            </div>
+            <p className="privacy-justify">
+              We update this policy when our services, website tools or data practices change.
+              The version published on this website states its effective date below.
+            </p>
+          </div>
+        </Reveal>
       </section>
 
       {/* CLOSING CTA */}
@@ -612,13 +685,13 @@ export default function PrivacyPolicy() {
             <h2 className="mt-4 text-3xl md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: INK }}>
               We're glad to explain anything here.
             </h2>
-            <p className="mt-4 max-w-lg mx-auto text-sm leading-relaxed" style={{ color: MUTED }}>
+            <p className="privacy-justify mt-4 max-w-lg mx-auto text-sm leading-relaxed" style={{ color: MUTED }}>
               Reach out any time to ask about your data, or to request access, correction or deletion.
             </p>
             <a href="/contact" className="privacy-boarding-cta">
               Contact Us <ArrowRight size={16} />
             </a>
-            <div className="privacy-updated">Last updated: September 2026</div>
+            <div className="privacy-updated">Last updated: [date of publication]</div>
           </div>
         </Reveal>
       </section>
